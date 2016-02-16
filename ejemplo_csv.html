@@ -1,0 +1,75 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="chart_div"></div>
+
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script src="http://code.jquery.com/jquery-2.2.0.min.js"></script>
+        <script>
+
+            // Cargamos el gráfico
+            google.charts.load('current', {packages: ['corechart']});
+            google.charts.setOnLoadCallback(drawChart);
+
+            function drawChart() {
+                var headers = ["ARQUITECTO O INGENIERO TECNICO", "B.ELEM.,GRAD.ESC.,EGB,ESO", "BACH. SUP.,BUP,LOGSE,COU", "BACH.,FP 2,EQUIV.,SUPERIORES", "DIPLOMADO ESCUELAS UNIVERSITARIAS", "DOCTORADO,POSTGRADO,ESPECIALIZACION", "EPO/EGB INCOMPL.,CDO.ESCOLARIDAD", "EST.SUPER.NO UNIVERSITARIOS", "FP 1 O MEDIO,OFIC.INDUSTRIAL", "FP 2 O SUPER.,MAESTRIA INDUSTRIAL", "GRADUADO ESCOLAR O EQUIVALENTE", "INFERIOR A GRAD. ESCOLAR", "LICEN.UNIV.,ARQUIT.O ING.SUPER", "NO APLICABLE (MENOR 10 AÑOS)", "NO SABE LEER NI ESCRIBIR", "OTROS TITULOS MEDIOS", "SIN ESTUDIOS"];
+
+                var data = new google.visualization.DataTable();
+
+                data.addColumn('string', 'Barrio');
+                data.addColumn('number', 'ARQUITECTO O INGENIERO TECNICO');
+                data.addColumn('number', 'B.ELEM.,GRAD.ESC.,EGB,ESO');
+                data.addColumn('number', 'BACH. SUP.,BUP,LOGSE,COU');
+                data.addColumn('number', 'BACH.,FP 2,EQUIV.,SUPERIORES');
+                data.addColumn('number', 'DIPLOMADO ESCUELAS UNIVERSITARIAS');
+                data.addColumn('number', 'DOCTORADO,POSTGRADO,ESPECIALIZACION');
+                data.addColumn('number', 'EPO/EGB INCOMPL.,CDO.ESCOLARIDAD');
+                data.addColumn('number', 'EST.SUPER.NO UNIVERSITARIOS');
+                data.addColumn('number', 'FP 1 O MEDIO,OFIC.INDUSTRIAL');
+                data.addColumn('number', 'FP 2 O SUPER.,MAESTRIA INDUSTRIAL');
+                data.addColumn('number', 'GRADUADO ESCOLAR O EQUIVALENTE');
+                data.addColumn('number', 'INFERIOR A GRAD. ESCOLAR');
+                data.addColumn('number', 'LICEN.UNIV.,ARQUIT.O ING.SUPER');
+                data.addColumn('number', 'NO APLICABLE (MENOR 10 AÑOS)');
+                data.addColumn('number', 'NO SABE LEER NI ESCRIBIR');
+                data.addColumn('number', 'OTROS TITULOS MEDIOS');
+                data.addColumn('number', 'SIN ESTUDIOS');
+
+                var rows = []
+
+                $.getJSON('http://localhost:8000/csv.json', function(jsonData) {
+                    $.each(jsonData, function(key, val){
+                        var jsonObject = val;
+                        var nombreBarrio = jsonObject["NOMBRE_DISTRITO"] + " - " + jsonObject["NOMBRE_BARRIO"];
+                        var row = [nombreBarrio]
+                        $.each(headers, function(objectKey, objectVal){
+                            if (jsonObject[objectVal] == null) {
+                                row.push(0);
+                            } else {
+                                row.push(parseInt(jsonObject[objectVal]));
+                            }
+                        });
+                        rows.push(row);
+                    });
+                    data.addRows(rows);
+                    var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                    var options = {
+                        title: 'Nivel de estudios de Bilbao',
+                        isStacked: true,
+                        hAxis: {
+                          title: 'Barrio',
+                          format: 'string',
+                        },
+                        vAxis: {
+                          title: 'Nivel de estudios'
+                        },
+                        height: 1000,
+                      };
+                    chart.draw(data, options);
+                });
+
+            }
+        </script>
+    </body>
+</html>
